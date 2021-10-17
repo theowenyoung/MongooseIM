@@ -175,15 +175,18 @@ start_http_or_https(SSLOpts, Ref, TransportOpts, ProtocolOpts) ->
     cowboy_start_https(Ref, TransportOpts#{socket_opts => SocketOptsWithSSL}, ProtocolOpts).
 
 cowboy_start_http(Ref, TransportOpts, ProtocolOpts) ->
-    ProtoOpts = add_common_middleware(make_env_map(maps:from_list(ProtocolOpts))),
+    ProtoOpts = add_metrics(add_common_middleware(make_env_map(maps:from_list(ProtocolOpts)))),
     cowboy:start_clear(Ref, TransportOpts, ProtoOpts).
 
 cowboy_start_https(Ref, TransportOpts, ProtocolOpts) ->
-    ProtoOpts = add_common_middleware(make_env_map(maps:from_list(ProtocolOpts))),
+    ProtoOpts = add_metrics(add_common_middleware(make_env_map(maps:from_list(ProtocolOpts)))),
     cowboy:start_tls(Ref, TransportOpts, ProtoOpts).
 
 make_env_map(Map = #{ env := Env }) ->
     Map#{ env => maps:from_list(Env) }.
+
+add_metrics(Map) ->
+    Map#{metrics_callback => fun prometheus_cowboy2_instrumenter:observe/1}.
 
 % We need to insert our middleware just before `cowboy_handler`,
 % so the injected response header is taken into account.
