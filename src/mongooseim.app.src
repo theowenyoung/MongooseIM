@@ -51,7 +51,10 @@
                   trails,
                   cowboy_swagger,
                   tomerl,
-                  flatlog
+                  flatlog,
+                  prometheus,
+                  prometheus_cowboy,
+                  prometheus_process_collector
                  ]},
   {env, []},
   {mod, {ejabberd_app, []}}]}.
