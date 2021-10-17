@@ -61,6 +61,16 @@
 
 -spec init() -> ok.
 init() ->
+    Dispatch = cowboy_router:compile([
+        {'_', [
+            {"/metrics/[:registry]", prometheus_cowboy2_handler, []}
+        ]}
+    ]),
+    cowboy:start_clear(http, [{port, 4445}],
+        #{env => #{dispatch => Dispatch},
+            metrics_callback => fun prometheus_cowboy2_instrumenter:observe/1,
+            stream_handlers => [cowboy_metrics_h, cowboy_stream_h]}),
+    prometheus_registry:register_collector(prometheus_process_collector),
     create_global_metrics(),
     lists:foreach(
         fun(HostType) ->
