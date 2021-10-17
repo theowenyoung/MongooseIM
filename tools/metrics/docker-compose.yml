@@ -1,0 +1,43 @@
+version: '3.7'
+services:
+
+  prometheus:
+    image: prom/prometheus:v2.30.3
+    container_name: prometheus
+    network_mode: "host"
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
+    restart: "no"
+
+  grafana:
+    image: grafana/grafana:8.2.1-ubuntu
+    container_name: grafana
+    network_mode: "host"
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    restart: "no"
+
+  graphite:
+    image: graphiteapp/graphite-statsd:1.1.8-2
+    container_name: graphite
+    network_mode: "host"
+    volumes:
+        - graphite-data
+        - ./graphite/carbon.conf:/opt/graphite/conf/carbon.conf:ro
+        - ./graphite/storage-schemas.conf:/opt/graphite/conf/storage-schemas.conf:ro
+
+volumes:
+  prometheus-data:
+  grafana-data:
+  graphite-data:
