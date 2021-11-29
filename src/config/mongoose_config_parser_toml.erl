@@ -162,7 +162,7 @@ handle_step(validate, _Path, ParsedValue, Spec) ->
 handle_step(process, Path, ParsedValue, Spec) ->
     process(Path, ParsedValue, process_spec(Spec));
 handle_step(format, Path, ProcessedValue, Spec) ->
-    format(Path, ProcessedValue, format_spec(Spec)).
+    format(Path, ProcessedValue, Spec).
 
 -spec check_required_keys(mongoose_config_spec:config_section(), toml_section()) -> any().
 check_required_keys(#section{required = all, items = Items}, Section) ->
@@ -208,41 +208,52 @@ convert(V, int_or_atom) -> b2a(V);
 convert(V, integer) when is_integer(V) -> V;
 convert(V, float) when is_float(V) -> V.
 
--spec format_spec(mongoose_config_spec:config_node()) -> mongoose_config_spec:format().
-format_spec(#section{format = Format}) -> Format;
-format_spec(#list{format = Format}) -> Format;
-format_spec(#option{format = Format}) -> Format.
+-spec format(path(), config_part(), mongoose_config_spec:config_node()) -> [config_part()].
+format(Path, V, #section{format = Format, format_items = FormatItems}) ->
+    wrap(Path, format_items(Path, V, FormatItems), Format);
+format(Path, V, #list{format = Format, format_items = FormatItems}) ->
+    wrap(Path, format_items(Path, V, FormatItems), Format);
+format(Path, V, #option{format = Format}) ->
+    wrap(Path, V, Format).
 
--spec format(path(), config_part(), mongoose_config_spec:format()) -> [config_part()].
-format(Path, KVs, {foreach, Format}) when is_atom(Format) ->
+-spec format_items(path(), config_part(), mongoose_config_spec:format_items()) -> config_part().
+format_items(_Path, KVs, map) ->
     Keys = lists:map(fun({K, _}) -> K end, KVs),
     mongoose_config_validator:validate_list(Keys, unique),
-    lists:flatmap(fun({K, V}) -> format(Path, V, {Format, K}) end, KVs);
-format([Key|_] = Path, V, host_config) ->
-    format(Path, V, {host_config, b2a(Key)});
-format([Key|_] = Path, V, global_config) ->
-    format(Path, V, {global_config, b2a(Key)});
-format(Path, V, {host_config, Key}) ->
+    maps:from_list(KVs);
+format_items(Path, KVs, {foreach, Format}) ->
+    Keys = lists:map(fun({K, _}) -> K end, KVs),
+    mongoose_config_validator:validate_list(Keys, unique),
+    lists:flatmap(fun({K, V}) -> wrap(Path, V, {Format, K}) end, KVs);
+format_items(_Path, Value, none) ->
+    Value.
+
+-spec wrap(path(), config_part(), mongoose_config_spec:format()) -> [config_part()].
+wrap([Key|_] = Path, V, host_config) ->
+    wrap(Path, V, {host_config, b2a(Key)});
+wrap([Key|_] = Path, V, global_config) ->
+    wrap(Path, V, {global_config, b2a(Key)});
+wrap(Path, V, {host_config, Key}) ->
     [{{Key, get_host(Path)}, V}];
-format(Path, V, {global_config, Key}) ->
+wrap(Path, V, {global_config, Key}) ->
     global = get_host(Path),
     [{Key, V}];
-format([Key|_] = Path, V, {host_or_global_config, Tag}) ->
+wrap([Key|_] = Path, V, {host_or_global_config, Tag}) ->
     [{{Tag, b2a(Key), get_host(Path)}, V}];
-format([item|_] = Path, V, default) ->
-    format(Path, V, item);
-format([Key|_] = Path, V, default) ->
-    format(Path, V, {kv, b2a(Key)});
-format(_Path, V, {kv, Key}) ->
+wrap([item|_] = Path, V, default) ->
+    wrap(Path, V, item);
+wrap([Key|_] = Path, V, default) ->
+    wrap(Path, V, {kv, b2a(Key)});
+wrap(_Path, V, {kv, Key}) ->
     [{Key, V}];
-format(_Path, V, item) ->
+wrap(_Path, V, item) ->
     [V];
-format(_Path, _V, skip) ->
+wrap(_Path, _V, skip) ->
     [];
-format([Key|_], V, prepend_key) ->
+wrap([Key|_], V, prepend_key) ->
     L = [b2a(Key) | tuple_to_list(V)],
     [list_to_tuple(L)];
-format(_Path, V, none) when is_list(V) ->
+wrap(_Path, V, none) when is_list(V) ->
     V.
 
 -spec get_host(path()) -> jid:server() | global.

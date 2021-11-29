@@ -62,9 +62,6 @@
       % Config options, see the type below for details
         config_option_format()
 
-      % Config option for each {K, V} in Value, which has to be a list
-      | {foreach, config_option_format()}
-
       % Config option, the key is replaced with NewKey
       | {config_option_format(), NewKey :: term()}
 
@@ -87,8 +84,14 @@
       | {kv, NewKey :: term()} % {NewKey, Value} - replaces the key with NewKey
       | prepend_key. % {Key, V1, ..., Vn} when Value = {V1, ..., Vn}
 
+%% For lists and sections, this option allows to format their items
+-type format_items() ::
+        none         % keep the processed items unchanged
+      | map          % Convert the processed items (which have to be a KV list) to a map
+      | {foreach, config_option_format()}. % Format each processed item as a top-level option
+
 -export_type([config_node/0, config_section/0, config_list/0, config_option/0,
-              format/0, option_type/0]).
+              format/0, format_items/0, option_type/0]).
 
 %% Config processing functions are annotated with TOML paths
 %% Path syntax: dotted, like TOML keys with the following additions:
@@ -498,7 +501,8 @@ auth() ->
                  <<"rdbms">> => auth_rdbms(),
                  <<"dummy">> => auth_dummy()},
        process = fun ?MODULE:process_auth/1,
-       format = {foreach, host_config}
+       format_items = {foreach, host_config},
+       format = none
       }.
 
 %% path: (host_config[].)auth.password
@@ -1030,13 +1034,16 @@ s2s() ->
                                                  validate = {enum, [allow, deny]},
                                                  format = {host_config, s2s_default_policy}},
                  <<"host_policy">> => #list{items = s2s_host_policy(),
-                                            format = {foreach, host_config}},
+                                            format_items = {foreach, host_config},
+                                            format = none},
                  <<"address">> => #list{items = s2s_address(),
-                                        format = {foreach, global_config}},
+                                        format_items = {foreach, global_config},
+                                        format = none},
                  <<"ciphers">> => #option{type = string,
                                           format = {global_config, s2s_ciphers}},
                  <<"domain_certfile">> => #list{items = s2s_domain_cert(),
-                                                format = {foreach, global_config}},
+                                                format_items = {foreach, global_config},
+                                                format = none},
                  <<"shared">> => #option{type = binary,
                                          validate = non_empty,
                                          format = {host_config, s2s_shared}},

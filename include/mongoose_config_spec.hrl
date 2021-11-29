@@ -8,13 +8,15 @@
                   validate = any :: mongoose_config_validator:section_validator(),
                   process :: undefined | mongoose_config_parser_toml:list_processor(),
                   format = default :: mongoose_config_spec:format(),
+                  format_items = none :: mongoose_config_spec:format_items(),
                   defaults = #{} :: #{mongoose_config_parser_toml:toml_key() =>
                                          mongoose_config_parser_toml:config_part()}}).
 
 -record(list, {items :: mongoose_config_spec:config_node(),
                validate = any :: mongoose_config_validator:list_validator(),
                process :: undefined | mongoose_config_parser_toml:list_processor(),
-               format = default :: mongoose_config_spec:format()}).
+               format = default :: mongoose_config_spec:format(),
+               format_items = none :: mongoose_config_spec:format_items()}).
 
 -record(option, {type :: mongoose_config_spec:option_type(),
                  validate = any :: mongoose_config_validator:validator(),
