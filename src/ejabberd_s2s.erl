@@ -550,12 +550,12 @@ allow_host(MyServer, S2SHost) ->
     end.
 
 allow_host1(MyHost, S2SHost) ->
-    case mongoose_config:lookup_opt({{s2s_host, S2SHost}, MyHost}) of
+    case maps:find(S2SHost, mongoose_config:get_opt({s2s_host_policy, MyHost}, #{})) of
         {ok, deny} ->
             false;
         {ok, allow} ->
             true;
-        {error, not_found} ->
+        error ->
             case mongoose_config:lookup_opt({s2s_default_policy, MyHost}) of
                 {ok, deny} ->
                     false;

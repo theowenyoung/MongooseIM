@@ -1361,10 +1361,10 @@ s2s_default_policy(_Config) ->
 s2s_host_policy(_Config) ->
     Policy = #{<<"host">> => <<"host1">>,
                <<"policy">> => <<"allow">>},
-    ?cfgh({s2s_host, <<"host1">>}, allow,
+    ?cfgh(s2s_host_policy, #{<<"host1">> => allow},
           #{<<"s2s">> => #{<<"host_policy">> => [Policy]}}),
-    ?cfgh([{{s2s_host, <<"host1">>}, allow},
-           {{s2s_host, <<"host2">>}, deny}],
+    ?cfgh(s2s_host_policy, #{<<"host1">> => allow,
+                             <<"host2">> => deny},
           #{<<"s2s">> => #{<<"host_policy">> => [Policy, #{<<"host">> => <<"host2">>,
                                                            <<"policy">> => <<"deny">>}]}}),
     ?errh(#{<<"s2s">> => #{<<"host_policy">> => [maps:without([<<"host">>], Policy)]}}),

@@ -32,7 +32,7 @@
 {{s2s_max_retry_delay,<<"localhost">>},30}.
 {{s2s_shared,<<"dummy_host">>},<<"shared secret">>}.
 {{s2s_shared,<<"localhost">>},<<"shared secret">>}.
-{{{s2s_host,<<"fed1">>},<<"dummy_host">>},allow}.
-{{{s2s_host,<<"fed1">>},<<"localhost">>},allow}.
-{{{s2s_host,<<"reg1">>},<<"dummy_host">>},deny}.
-{{{s2s_host,<<"reg1">>},<<"localhost">>},deny}.
+{{s2s_host_policy,<<"dummy_host">>},
+ #{<<"fed1">> => allow,<<"reg1">> => deny}}.
+{{s2s_host_policy,<<"localhost">>},
+ #{<<"fed1">> => allow,<<"reg1">> => deny}}.

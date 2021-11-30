@@ -1034,8 +1034,8 @@ s2s() ->
                                                  validate = {enum, [allow, deny]},
                                                  format = {host_config, s2s_default_policy}},
                  <<"host_policy">> => #list{items = s2s_host_policy(),
-                                            format_items = {foreach, host_config},
-                                            format = none},
+                                            format_items = map,
+                                            format = {host_config, s2s_host_policy}},
                  <<"address">> => #list{items = s2s_address(),
                                         format_items = {foreach, global_config},
                                         format = none},
@@ -1425,7 +1425,7 @@ process_s2s_address_family(6) -> ipv6.
 
 process_s2s_host_policy(KVs) ->
     {[[{host, S2SHost}], [{policy, Policy}]], []} = proplists:split(KVs, [host, policy]),
-    {{s2s_host, S2SHost}, Policy}.
+    {S2SHost, Policy}.
 
 process_s2s_address(KVs) ->
     {[[{host, S2SHost}], [{ip_address, IPAddr}]], Opts} = proplists:split(KVs, [host, ip_address]),
