@@ -30,7 +30,8 @@
                | integer()
                | string()
                | [value()]
-               | tuple().
+               | tuple()
+               | map().
 
 -export_type([key/0, value/0]).
 

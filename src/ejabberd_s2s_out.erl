@@ -1188,8 +1188,8 @@ get_addr_list(Server) ->
 %% @doc Get IPs predefined for a given s2s domain in the configuration
 -spec get_predefined_addresses(jid:server()) -> [{inet:ip_address(), inet:port_number()}].
 get_predefined_addresses(Server) ->
-    case mongoose_config:lookup_opt({s2s_addr, Server}) of
-        {error, not_found} -> [];
+    case maps:find(Server, mongoose_config:get_opt(s2s_address, #{})) of
+        error -> [];
         {ok, S2SAddr} -> do_get_predefined_addresses(S2SAddr)
     end.
 

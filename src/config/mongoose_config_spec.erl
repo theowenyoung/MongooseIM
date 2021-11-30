@@ -1037,8 +1037,8 @@ s2s() ->
                                             format_items = map,
                                             format = {host_config, s2s_host_policy}},
                  <<"address">> => #list{items = s2s_address(),
-                                        format_items = {foreach, global_config},
-                                        format = none},
+                                        format_items = map,
+                                        format = {global_config, s2s_address}},
                  <<"ciphers">> => #option{type = string,
                                           format = {global_config, s2s_ciphers}},
                  <<"domain_certfile">> => #list{items = s2s_domain_cert(),
@@ -1429,7 +1429,7 @@ process_s2s_host_policy(KVs) ->
 
 process_s2s_address(KVs) ->
     {[[{host, S2SHost}], [{ip_address, IPAddr}]], Opts} = proplists:split(KVs, [host, ip_address]),
-    {{s2s_addr, S2SHost}, s2s_address(IPAddr, Opts)}.
+    {S2SHost, s2s_address(IPAddr, Opts)}.
 
 s2s_address(IPAddress, []) -> IPAddress;
 s2s_address(IPAddress, [{port, Port}]) -> {IPAddress, Port}.

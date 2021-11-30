@@ -24,8 +24,8 @@
 {{domain_certfile,<<"example.org">>},"/path/to/example_org.pem"}.
 {{replaced_wait_timeout,<<"dummy_host">>},2000}.
 {{replaced_wait_timeout,<<"localhost">>},2000}.
-{{s2s_addr,<<"fed1">>},"127.0.0.1"}.
-{{s2s_addr,<<"fed2">>},{"127.0.0.1",8765}}.
+{s2s_address,#{<<"fed1">> => "127.0.0.1",
+               <<"fed2">> => {"127.0.0.1",8765}}}.
 {{s2s_default_policy,<<"dummy_host">>},allow}.
 {{s2s_default_policy,<<"localhost">>},allow}.
 {{s2s_max_retry_delay,<<"dummy_host">>},30}.
