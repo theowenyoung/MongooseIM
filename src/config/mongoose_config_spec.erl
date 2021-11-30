@@ -1042,8 +1042,8 @@ s2s() ->
                  <<"ciphers">> => #option{type = string,
                                           format = {global_config, s2s_ciphers}},
                  <<"domain_certfile">> => #list{items = s2s_domain_cert(),
-                                                format_items = {foreach, global_config},
-                                                format = none},
+                                                format_items = map,
+                                                format = {global_config, domain_certfile}},
                  <<"shared">> => #option{type = binary,
                                          validate = non_empty,
                                          format = {host_config, s2s_shared}},
@@ -1436,4 +1436,4 @@ s2s_address(IPAddress, [{port, Port}]) -> {IPAddress, Port}.
 
 process_s2s_domain_cert(KVs) ->
     {[[{domain, Domain}], [{certfile, Certfile}]], []} = proplists:split(KVs, [domain, certfile]),
-    {{domain_certfile, Domain}, Certfile}.
+    {Domain, Certfile}.

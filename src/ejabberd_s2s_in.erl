@@ -250,9 +250,9 @@ wait_for_feature_request({xmlstreamelement, El}, StateData) ->
                                    TLSEnabled == false,
                                    SockMod == gen_tcp ->
             ?LOG_DEBUG(#{what => s2s_starttls}),
-            Socket = StateData#state.socket,
-            TLSOpts = case mongoose_config:lookup_opt({domain_certfile, StateData#state.server}) of
-                          {error, not_found} ->
+            #state{socket = Socket, server = Server} = StateData,
+            TLSOpts = case maps:find(Server, mongoose_config:get_opt(domain_certfile, #{})) of
+                          error ->
                               StateData#state.tls_options;
                           {ok, CertFile} ->
                               lists:keystore(certfile, 1, StateData#state.tls_options, {certfile, CertFile})
